@@ -8,4 +8,3 @@ services:
     environment:
       - NGROK_URL=http://52.91.183.23;3000/incoming
       - WS_URL=ws://52.91.183.23:3000/connection
-      - PHONE_NUMBER=+91YOUR_PHONE_NUMBER
