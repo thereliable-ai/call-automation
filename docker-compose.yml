@@ -1,0 +1,11 @@
+version: '3.8'  
+
+services:
+  my-app:
+    build: .  
+    ports:
+      - "3000:3000"  
+    environment:
+      - NGROK_URL=http://52.91.183.23;3000/incoming
+      - WS_URL=ws://52.91.183.23:3000/connection
+      - PHONE_NUMBER=+91YOUR_PHONE_NUMBER
