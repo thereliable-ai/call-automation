@@ -50,12 +50,119 @@ Remember, your primary objective as rahul is to secure the customer's commitment
     }
   }
 
+  // async completion(text, interactionCount, role = 'user', name = 'user') {
+  //   try {
+  //       const response = await fetch('http://0.0.0.0:8000/chat/{userId}', {
+  //           method: 'POST',
+  //           headers: { 'Content-Type': 'application/json' },
+  //           body: JSON.stringify({
+  //               content: text,
+  //               userId: 1122,
+  //           }),
+  //       });
+
+  //       if (!response.ok) {
+  //           throw new Error(`Groq request failed with status ${response.status}`);
+  //       }
+
+  //       const reader = response.body.getReader();
+  //       let buffer = "";
+  //       let concatenatedResponse = "";
+
+  //       while (true) {
+  //           const { done, value } = await reader.read();
+  //           if (done) {
+  //               break;
+  //           }
+
+  //           buffer += new TextDecoder().decode(value);
+
+  //           let lastValidEndIndex = 0;
+  //           for (let i = 0; i < buffer.length; i++) {
+  //               if (buffer[i] === "{") {
+  //                   let endIndex = buffer.indexOf("}", i);
+  //                   if (endIndex !== -1) {
+  //                       try {
+  //                           const parsedChunk = JSON.parse(buffer.substring(i, endIndex + 1));
+  //                           const partialResponse = parsedChunk.partialResponse;
+  //                           concatenatedResponse += partialResponse;
+
+  //                           lastValidEndIndex = endIndex + 1;
+  //                       } catch (err) {
+  //                           console.error('Error parsing chunk:', err); // Log parsing errors
+  //                       }
+  //                   }
+  //               }
+  //           }
+  //           buffer = buffer.substring(lastValidEndIndex);
+  //       }
+
+  //       this.emit('gptreply', {
+  //           partialResponseIndex: this.partialResponseIndex,
+  //           partialResponse: concatenatedResponse
+  //       }, interactionCount);
+
+  //   } catch (err) {
+  //       console.error('Error in GroqService:', err);
+  //       this.emit('error', err); // Emit an error event if something goes wrong
+  //   }
+  // }
+
+
+
+  // async completion(text, interactionCount, role = 'user', name = 'user') {
+  //   try {
+  //     const response = await fetch('http://0.0.0.0:8000/chat/{userId}', { // Adjust port and endpoint
+  //       method: 'POST',
+  //       headers: { 'Content-Type': 'application/json' },
+  //       body: JSON.stringify({
+  //         content: text,
+  //         userId: 1122, // Assuming you want to use 'name' as the user ID
+  //       }),
+  //     });
+  
+  //     if (!response.ok) {
+  //       throw new Error(`Groq request failed with status ${response.status}`);
+  //     }
+  
+  //     //handle streaming response
+  //     const reader = response.body.getReader();
+  //     while (true) {
+  //       const { done, value } = await reader.read();
+  //       if (done) {
+  //         break;
+  //       }
+  
+  //       const chunk = new TextDecoder().decode(value);
+  //       console.log(chunk);
+  //       try {
+  //         const parsedChunk = JSON.parse(chunk);
+  //         const partialResponse = parsedChunk.partialResponse;
+  
+  //         this.emit('gptreply', {
+  //           partialResponseIndex: this.partialResponseIndex,
+  //           partialResponse
+  //         }, interactionCount);
+  
+  //         this.partialResponseIndex++;
+  //       } catch (err) {
+  //         console.error('Error parsing chunk:', err);
+  //         // Handle parsing error, if needed
+  //       }
+  //     }
+  //   } catch (err) {
+  //     console.error('Error in GroqService:', err);
+  //     this.emit('error', err);
+  //   }
+  // }
+
+
   async completion(text, interactionCount, role = 'user', name = 'user') {
     this.updateUserContext(name, role, text);
 
     // Step 1: Send user transcription to Chat GPT
     const stream = await this.openai.chat.completions.create({
-      model: 'gpt-4-1106-preview',
+      model: 'gpt-4o',
       messages: this.userContext,
       tools: tools,
       stream: true,

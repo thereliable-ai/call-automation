@@ -18,7 +18,7 @@ app.post('/incoming', (req, res) => {
   res.status(200);
   res.type('text/xml');
   res.end(`
-  <Response>
+  <Response>u
     <Connect>
       <Stream url="wss://${process.env.SERVER}/connection" />
     </Connect>
@@ -31,7 +31,8 @@ app.ws('/connection', (ws) => {
   // Filled in from start message
   let streamSid;
   let callSid;
-
+  let startTime = null;
+  let prevEndTime = null;
   const gptService = new GptService();
   const streamService = new StreamService(ws);
   const transcriptionService = new TranscriptionService();
@@ -61,6 +62,9 @@ app.ws('/connection', (ws) => {
     }
   });
 
+  startTime = performance.now()
+  prevEndTime = startTime
+  
   transcriptionService.on('utterance', async (text) => {
     if(marks.length > 0 && text?.length > 5) {
       console.log('Twilio -> Interruption, Clearing stream'.red);
@@ -75,20 +79,46 @@ app.ws('/connection', (ws) => {
 
   transcriptionService.on('transcription', async (text) => {
     if (!text) { return; }
+    const currentTime = performance.now();
     console.log(`Interaction ${interactionCount} – STT -> GPT: ${text}`.yellow);
+    console.log(`STT Latency: ${(currentTime - prevEndTime).toFixed(2)}ms`.cyan);
+    prevEndTime = currentTime; // Store end time for next calculation
     gptService.completion(text, interactionCount);
     interactionCount += 1;
   });
   
   gptService.on('gptreply', async (gptReply, icount) => {
+    const currentTime = performance.now();
     console.log(`Interaction ${icount}: GPT -> TTS: ${gptReply.partialResponse}`.green );
+    console.log(`GPT Latency: ${(currentTime - prevEndTime).toFixed(2)}ms`.cyan);
+    prevEndTime = currentTime;
     ttsService.generate(gptReply, icount);
   });
 
   ttsService.on('speech', (responseIndex, audio, label, icount) => {
+    const currentTime = performance.now();
     console.log(`Interaction ${icount}: TTS -> TWILIO: ${label}`.blue);
+    console.log(`TTS Latency: ${(currentTime - prevEndTime).toFixed(2)}ms`.cyan);
+    prevEndTime = currentTime;
     streamService.buffer(responseIndex, audio);
   });
+
+  // transcriptionService.on('transcription', async (text) => {
+  //   if (!text) { return; }
+  //   console.log(`Interaction ${interactionCount} – STT -> GPT: ${text}`.yellow);
+  //   gptService.completion(text, interactionCount);
+  //   interactionCount += 1;
+  // });
+  
+  // gptService.on('gptreply', async (gptReply, icount) => {
+  //   console.log(`Interaction ${icount}: GPT -> TTS: ${gptReply.partialResponse}`.green );
+  //   ttsService.generate(gptReply, icount);
+  // });
+
+  // ttsService.on('speech', (responseIndex, audio, label, icount) => {
+  //   console.log(`Interaction ${icount}: TTS -> TWILIO: ${label}`.blue);
+  //   streamService.buffer(responseIndex, audio);
+  // });
 
   // streamService.on('audiosent', (markLabel) => {
   //   marks.push(markLabel);

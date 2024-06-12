@@ -2,8 +2,6 @@
 npm run dev &
 sleep 5
 
-npm run outbound &
-
 wscat -c "$WS_URL" &
 
 curl -x post "$ngrok_url" -h "content-type: application/json"

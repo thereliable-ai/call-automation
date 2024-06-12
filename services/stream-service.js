@@ -1,6 +1,9 @@
 const EventEmitter = require('events');
 const uuid = require('uuid');
 
+let timeStart;
+let endtime;
+let prevTime;
 class StreamService extends EventEmitter {
   constructor(websocket) {
     super();
@@ -33,6 +36,8 @@ class StreamService extends EventEmitter {
   }
 
   sendAudio (audio) {
+    timeStart = performance.now()
+    prevTime = timeStart;
     this.ws.send(
       JSON.stringify({
         streamSid: this.streamSid,
@@ -42,7 +47,8 @@ class StreamService extends EventEmitter {
         },
       })
     );
-    console.log("printing audio");
+    endtime = performance.now()
+    console.log(endtime - prevTime);
     this.ws.send(Buffer.from(audio, 'base64'));
     // When the media completes you will receive a `mark` message with the label
     const markLabel = uuid.v4();

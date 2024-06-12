@@ -18,7 +18,7 @@ class TextToSpeechService extends EventEmitter {
     if (!partialResponse) { return; }
 
     try {
-      const url = 'https://api.deepgram.com/v1/speak?model=aura-angus-en&encoding=mulaw'; 
+      const url = 'https://api.deepgram.com/v1/speak?model=aura-stella-en&encoding=mulaw'; 
       const options = {
         method: 'POST',
         headers: {

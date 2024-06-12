@@ -6,7 +6,7 @@ RUN npm install
 COPY . .  
 
 EXPOSE 3000  
-COPY run.sh /app/run.sh
-RUN chmod +x /app/run.sh
+COPY script /app/script
+RUN chmod +x /app/script
 
-CMD [ "/app/run.sh" ] 
+CMD [ "/app/script" ] 
